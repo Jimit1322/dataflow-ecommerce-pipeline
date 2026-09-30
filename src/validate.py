@@ -2,19 +2,26 @@ import pandas as pd
 from pathlib import Path
 
 
-CLEAN_DIR = Path("data/processed/clean")
+PROCESSED_DIR = Path("data/processed")
 
-
-customers_df = pd.read_csv(
-    CLEAN_DIR / "customers_clean.csv"
+RAW_ORDERS = pd.read_csv(
+    PROCESSED_DIR / "orders_ingested.csv"
 )
 
-products_df = pd.read_csv(
-    CLEAN_DIR / "products_clean.csv"
+CLEAN_ORDERS = pd.read_csv(
+    PROCESSED_DIR / "clean" / "orders_clean.csv"
 )
 
-orders_df = pd.read_csv(
-    CLEAN_DIR / "orders_clean.csv"
+REJECTED_ORDERS = pd.read_csv(
+    PROCESSED_DIR / "rejected" / "orders_rejected.csv"
+)
+
+CUSTOMERS = pd.read_csv(
+    PROCESSED_DIR / "clean" / "customers_clean.csv"
+)
+
+PRODUCTS = pd.read_csv(
+    PROCESSED_DIR / "clean" / "products_clean.csv"
 )
 
 
@@ -23,54 +30,138 @@ print("       DATA QUALITY REPORT")
 print("======================================")
 
 
-print("\nCUSTOMERS")
-print("Total records:", len(customers_df))
+# --------------------------------
+# Raw data
+# --------------------------------
+
+print("\nRAW ORDERS")
+
 print(
-    "Missing customer IDs:",
-    customers_df["customer_id"].isna().sum()
-)
-print(
-    "Duplicate customer IDs:",
-    customers_df["customer_id"].duplicated().sum()
+    "Total records:",
+    len(RAW_ORDERS)
 )
 
-
-print("\nPRODUCTS")
-print("Total records:", len(products_df))
-print(
-    "Missing product IDs:",
-    products_df["product_id"].isna().sum()
-)
-print(
-    "Invalid prices:",
-    (products_df["price"] <= 0).sum()
-)
-
-
-print("\nORDERS")
-print("Total records:", len(orders_df))
-print(
-    "Missing order IDs:",
-    orders_df["order_id"].isna().sum()
-)
 print(
     "Duplicate order IDs:",
-    orders_df["order_id"].duplicated().sum()
+    RAW_ORDERS["order_id"].duplicated().sum()
 )
-print(
-    "Invalid quantities:",
-    (orders_df["quantity"] <= 0).sum()
-)
+
 print(
     "Missing customer IDs:",
-    orders_df["customer_id"].isna().sum()
-)
-print(
-    "Missing product IDs:",
-    orders_df["product_id"].isna().sum()
+    RAW_ORDERS["customer_id"].isna().sum()
 )
 
+print(
+    "Invalid quantities:",
+    (RAW_ORDERS["quantity"] <= 0).sum()
+)
+
+
+# --------------------------------
+# Rejected records
+# --------------------------------
+
+print("\nREJECTED RECORDS")
+
+print(
+    "Total rejected:",
+    len(REJECTED_ORDERS)
+)
+
+print(
+    REJECTED_ORDERS[
+        "rejection_reason"
+    ].value_counts()
+)
+
+
+# --------------------------------
+# Clean data
+# --------------------------------
+
+print("\nCLEAN DATA")
+
+print(
+    "Valid records:",
+    len(CLEAN_ORDERS)
+)
+
+print(
+    "Duplicate order IDs:",
+    CLEAN_ORDERS["order_id"].duplicated().sum()
+)
+
+print(
+    "Missing customer IDs:",
+    CLEAN_ORDERS["customer_id"].isna().sum()
+)
+
+print(
+    "Invalid quantities:",
+    (
+        CLEAN_ORDERS["quantity"] <= 0
+    ).sum()
+)
+
+
+# --------------------------------
+# Referential integrity
+# --------------------------------
+
+valid_customer_ids = set(
+    CUSTOMERS["customer_id"]
+)
+
+valid_product_ids = set(
+    PRODUCTS["product_id"]
+)
+
+
+invalid_customers = (
+    ~CLEAN_ORDERS["customer_id"].isin(
+        valid_customer_ids
+    )
+).sum()
+
+
+invalid_products = (
+    ~CLEAN_ORDERS["product_id"].isin(
+        valid_product_ids
+    )
+).sum()
+
+
+print(
+    "Invalid customer references:",
+    invalid_customers
+)
+
+print(
+    "Invalid product references:",
+    invalid_products
+)
+
+
+# --------------------------------
+# Final status
+# --------------------------------
 
 print("\n======================================")
-print("       VALIDATION COMPLETED")
+
+if (
+    len(REJECTED_ORDERS) > 0
+    and
+    len(CLEAN_ORDERS) > 0
+):
+
+    print(
+        "DATA QUALITY PIPELINE PASSED"
+    )
+
+else:
+
+    print(
+        "DATA QUALITY PIPELINE FAILED"
+    )
+
 print("======================================")

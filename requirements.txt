@@ -1,5 +1,6 @@
 numpy==2.5.3
 pandas==3.0.6
+psycopg2-binary==2.9.13
 py4j==0.10.9.9
 pyspark==4.2.0
 python-dateutil==2.9.0.post0
