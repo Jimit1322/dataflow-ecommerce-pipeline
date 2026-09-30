@@ -26,3 +26,5 @@ metastore_db/
 
 # Logs
 *.log
+
+logs/

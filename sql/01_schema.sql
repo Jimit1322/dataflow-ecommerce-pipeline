@@ -1,7 +1,10 @@
+-- Remove the dependent view first
+DROP VIEW IF EXISTS order_analytics;
+
+-- Now tables can be dropped safely
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS customers;
-
 
 CREATE TABLE customers (
     customer_id VARCHAR(20) PRIMARY KEY,
