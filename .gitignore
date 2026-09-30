@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Generated data
+data/processed/
+data/output/
+
+# Spark
+spark-warehouse/
+metastore_db/
+
+# Logs
+*.log
